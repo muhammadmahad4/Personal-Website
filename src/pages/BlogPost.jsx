@@ -1,12 +1,48 @@
 import { Link, useParams } from "react-router-dom";
 import { getBlogPostBySlug } from "../data/portfolioData.js";
 
+function renderInline(text, keyPrefix) {
+  const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*|`[^`]+`)/g);
+  return parts.map((part, j) => {
+    const key = `${keyPrefix}-${j}`;
+    if (part.startsWith("**") && part.endsWith("**")) {
+      return (
+        <strong key={key} className="font-semibold text-slate-900 dark:text-white">
+          {part.slice(2, -2)}
+        </strong>
+      );
+    }
+    if (part.startsWith("`") && part.endsWith("`")) {
+      return (
+        <code key={key} className="rounded bg-slate-100 px-1.5 py-0.5 text-sm dark:bg-slate-800">
+          {part.slice(1, -1)}
+        </code>
+      );
+    }
+    if (part.startsWith("*") && part.endsWith("*")) {
+      return (
+        <em key={key} className="text-slate-500 dark:text-slate-400">
+          {part.slice(1, -1)}
+        </em>
+      );
+    }
+    return part;
+  });
+}
+
 function MarkdownContent({ content }) {
   const blocks = content.split("\n\n");
 
   return (
     <div className="prose prose-slate max-w-none dark:prose-invert prose-headings:font-semibold prose-a:text-brand-600 prose-code:rounded prose-code:bg-slate-100 prose-code:px-1.5 prose-code:py-0.5 prose-code:text-sm prose-code:before:content-none prose-code:after:content-none dark:prose-code:bg-slate-800">
       {blocks.map((block, i) => {
+        if (block.startsWith("### ")) {
+          return (
+            <h3 key={i} className="mb-3 mt-6 text-lg font-semibold text-slate-900 dark:text-white">
+              {block.replace("### ", "")}
+            </h3>
+          );
+        }
         if (block.startsWith("## ")) {
           return (
             <h2 key={i} className="mb-4 mt-8 text-2xl font-semibold text-slate-900 dark:text-white">
@@ -26,29 +62,65 @@ function MarkdownContent({ content }) {
             </pre>
           );
         }
-        const parts = block.split(/(\*\*[^*]+\*\*|`[^`]+`)/g);
+        if (block.startsWith("![")) {
+          const lines = block.split("\n");
+          const match = lines[0].match(/^!\[([^\]]*)\]\((.+)\)$/);
+          const caption = lines.slice(1).join(" ").replace(/^\*|\*$/g, "");
+          if (!match) return null;
+          return (
+            <figure key={i} className="my-6">
+              <img
+                src={match[2]}
+                alt={match[1]}
+                className="w-full rounded-xl border border-slate-200 dark:border-slate-800"
+                loading="lazy"
+              />
+              {caption ? (
+                <figcaption className="mt-2 text-center text-sm text-slate-500 dark:text-slate-400">
+                  {caption}
+                </figcaption>
+              ) : null}
+            </figure>
+          );
+        }
+        if (block.startsWith("> ")) {
+          const lines = block.split("\n").map((l) => l.replace(/^>\s?/, ""));
+          return (
+            <blockquote
+              key={i}
+              className="my-4 border-l-4 border-brand-300 bg-brand-50/50 py-2 pl-4 text-slate-700 dark:border-brand-800 dark:bg-brand-950/30 dark:text-slate-300"
+            >
+              {lines.map((line, j) => (
+                <p key={j} className="mb-1 last:mb-0">
+                  {renderInline(line, `${i}-${j}`)}
+                </p>
+              ))}
+            </blockquote>
+          );
+        }
+        if (block.startsWith("- ")) {
+          const items = block.split("\n").map((l) => l.replace(/^-\s?/, ""));
+          return (
+            <ul key={i} className="mb-4 list-disc space-y-1.5 pl-5 leading-relaxed text-slate-600 dark:text-slate-400">
+              {items.map((item, j) => (
+                <li key={j}>{renderInline(item, `${i}-${j}`)}</li>
+              ))}
+            </ul>
+          );
+        }
+        if (/^\d+\.\s/.test(block) && block.split("\n").every((l) => /^\d+\.\s/.test(l))) {
+          const items = block.split("\n").map((l) => l.replace(/^\d+\.\s/, ""));
+          return (
+            <ol key={i} className="mb-4 list-decimal space-y-1.5 pl-5 leading-relaxed text-slate-600 dark:text-slate-400">
+              {items.map((item, j) => (
+                <li key={j}>{renderInline(item, `${i}-${j}`)}</li>
+              ))}
+            </ol>
+          );
+        }
         return (
           <p key={i} className="mb-4 leading-relaxed text-slate-600 dark:text-slate-400">
-            {parts.map((part, j) => {
-              if (part.startsWith("**") && part.endsWith("**")) {
-                return (
-                  <strong key={j} className="font-semibold text-slate-900 dark:text-white">
-                    {part.slice(2, -2)}
-                  </strong>
-                );
-              }
-              if (part.startsWith("`") && part.endsWith("`")) {
-                return (
-                  <code
-                    key={j}
-                    className="rounded bg-slate-100 px-1.5 py-0.5 text-sm dark:bg-slate-800"
-                  >
-                    {part.slice(1, -1)}
-                  </code>
-                );
-              }
-              return part;
-            })}
+            {renderInline(block, `${i}`)}
           </p>
         );
       })}

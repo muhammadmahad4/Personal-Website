@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450" viewBox="0 0 800 450">
+  <defs>
+    <linearGradient id="acadBg" x1="0" y1="0" x2="1" y2="1" gradientUnits="objectBoundingBox">
+      <stop offset="0%" stop-color="#06140f"/>
+      <stop offset="100%" stop-color="#0a1f18"/>
+    </linearGradient>
+    <linearGradient id="badgeFillAcad" x1="0" y1="0" x2="0" y2="1" gradientUnits="objectBoundingBox">
+      <stop offset="0%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#065f46"/>
+    </linearGradient>
+    <filter id="glowAcad" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="4.5" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <rect width="800" height="450" fill="url(#acadBg)"/>
+
+  <g stroke="#134e3a" stroke-width="0.6" opacity="0.35">
+    <line x1="0" y1="90" x2="800" y2="90"/>
+    <line x1="0" y1="180" x2="800" y2="180"/>
+    <line x1="0" y1="360" x2="800" y2="360"/>
+    <line x1="200" y1="0" x2="200" y2="450"/>
+    <line x1="600" y1="0" x2="600" y2="450"/>
+  </g>
+
+  <!-- Terminal window -->
+  <rect x="40" y="52" width="720" height="300" rx="10" fill="#081a14" stroke="#065f46" stroke-width="1.2"/>
+  <rect x="40" y="52" width="720" height="30" rx="10" fill="#0f2a20"/>
+  <rect x="40" y="67" width="720" height="15" fill="#0f2a20"/>
+  <circle cx="63" cy="67" r="5.5" fill="#ff5f57"/>
+  <circle cx="81" cy="67" r="5.5" fill="#febc2e"/>
+  <circle cx="99" cy="67" r="5.5" fill="#28c840"/>
+  <text x="400" y="72" text-anchor="middle" fill="#4d9483" font-family="monospace" font-size="11">grimmie@academy: ~</text>
+
+  <text x="58" y="110" fill="#6ec9ab" font-family="monospace" font-size="12">$ ftp 10.0.2.15 -&gt; anonymous</text>
+  <text x="58" y="130" fill="#9fe0c9" font-family="monospace" font-size="11">230 Login successful. get note.txt</text>
+
+  <text x="58" y="160" fill="#6ec9ab" font-family="monospace" font-size="12">$ curl .../kaio-ken.php --data-urlencode "telepathy=whoami"</text>
+  <text x="58" y="182" fill="#34d399" font-family="monospace" font-size="11.5">www-data</text>
+
+  <text x="58" y="212" fill="#6ec9ab" font-family="monospace" font-size="12">$ cat includes/config.php</text>
+  <text x="58" y="234" fill="#9fe0c9" font-family="monospace" font-size="11.5">grimmie : My_V3ryS3cur3_P4ss</text>
+
+  <text x="58" y="264" fill="#6ec9ab" font-family="monospace" font-size="12">$ crontab: * * * * * /home/grimmie/backup.sh</text>
+  <text x="58" y="286" fill="#34d399" font-family="monospace" font-size="12" font-weight="bold" filter="url(#glowAcad)">root@academy:~# whoami -&gt; root</text>
+  <rect x="58" y="294" width="8" height="13" fill="#34d399" opacity="0.85"/>
+
+  <!-- Badges row -->
+  <rect x="40" y="378" width="160" height="34" rx="17" fill="url(#badgeFillAcad)" opacity="0.9"/>
+  <text x="120" y="400" text-anchor="middle" fill="#ecfdf5" font-family="Inter,sans-serif" font-size="13" font-weight="700" letter-spacing="0.5">PEH &#183; ACADEMY</text>
+
+  <rect x="212" y="378" width="150" height="34" rx="17" fill="rgba(52,211,153,0.1)" stroke="#10b981" stroke-width="1"/>
+  <text x="287" y="400" text-anchor="middle" fill="#6ee7b7" font-family="Inter,sans-serif" font-size="12" font-weight="600">CVE-2020-23828</text>
+
+  <rect x="374" y="378" width="130" height="34" rx="17" fill="rgba(52,211,153,0.1)" stroke="#10b981" stroke-width="1"/>
+  <text x="439" y="400" text-anchor="middle" fill="#6ee7b7" font-family="Inter,sans-serif" font-size="12" font-weight="600">Cron Privesc</text>
+
+  <rect x="516" y="378" width="150" height="34" rx="17" fill="rgba(52,211,153,0.1)" stroke="#10b981" stroke-width="1"/>
+  <text x="591" y="400" text-anchor="middle" fill="#6ee7b7" font-family="Inter,sans-serif" font-size="12" font-weight="600">Cred Reuse</text>
+
+  <text x="760" y="400" text-anchor="end" fill="#3a6656" font-family="monospace" font-size="10.5">box 2 of 5</text>
+</svg>
