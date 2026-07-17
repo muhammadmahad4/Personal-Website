@@ -1,5 +1,6 @@
 import { Link, useParams } from "react-router-dom";
 import { getBlogPostBySlug } from "../data/portfolioData.js";
+import Comments from "../components/Comments.jsx";
 
 function renderInline(text, keyPrefix) {
   const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*|`[^`]+`)/g);
@@ -190,6 +191,10 @@ export default function BlogPost() {
 
         <div className="mt-10 border-t border-slate-200 pt-10 dark:border-slate-800">
           <MarkdownContent content={post.content} />
+        </div>
+
+        <div className="mt-12 border-t border-slate-200 pt-10 dark:border-slate-800">
+          <Comments term={post.slug} />
         </div>
       </div>
     </article>
