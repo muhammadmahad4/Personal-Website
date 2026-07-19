@@ -7,16 +7,12 @@ import Giscus from "@giscus/react";
  */
 const GISCUS_CONFIG = {
   repo: "muhammadmahad4/cursortest",
-  repoId: "REPLACE_WITH_REPO_ID",
+  repoId: "R_kgDOTG7s0Q",
   category: "Comments",
-  categoryId: "REPLACE_WITH_CATEGORY_ID",
+  categoryId: "DIC_kwDOTG7s0c4DBg40",
 };
 
 export default function Comments({ term }) {
-  if (GISCUS_CONFIG.repoId.startsWith("REPLACE_")) {
-    return null;
-  }
-
   return (
     <Giscus
       id="comments"
