@@ -14,7 +14,7 @@ export const personalInfo = {
   github: "https://github.com/muhammadmahad4",
   linkedin: "https://www.linkedin.com/in/muhammad-mahad-16a115246/",
   profileImage: "/assets/images/profile-pic.jpeg",
-  cvPath: "/assets/cv/My_CV.pdf",
+  cvPath: "/assets/cv/Muhammad_Mahad_CV.pdf",
 };
 
 export const about = {
