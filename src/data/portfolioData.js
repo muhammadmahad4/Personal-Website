@@ -19,12 +19,12 @@ export const personalInfo = {
 
 export const about = {
   summary:
-    "Final-year Computer Science student at CityU (Cybersecurity Stream, CGPA 3.93/4.3, Full Tuition Scholarship). I chose CS to understand how systems are built and the Cybersecurity Stream to understand how they break. At Siemens Mobility I work on the defensive side: least-privilege data-center access and server hardening. Evenings go to CTFs and HackTheBox write-ups that end with the root cause, not just the exploit. My final-year project asks how well an autonomous AI agent can do security work, and what new risks it brings.",
+    "Final-year Computer Science student at City University of Hong Kong, on the Cybersecurity Stream, with a 3.93/4.3 CGPA and a Full Tuition Scholarship. I chose CS to learn how systems are built and the Cybersecurity Stream to learn how they break. By day I work the defensive side at Siemens Mobility — least-privilege data-center access and server hardening — because most breaches are decided long before the attack arrives. By night I switch sides: CTFs and HackTheBox machines, each written up to the root cause, not just the exploit. Both sides are now turning to AI, which is the question behind my final-year project: how well can an autonomous agent do security work, and what new risks does it bring?",
   highlights: [
-    "CGPA 3.93/4.3: Dean's List, Tiger Award (Top 10% of Students) & Elite 100 Student",
-    "Intern at Siemens Mobility Hong Kong: bastion/PAM access design and CIS hardening",
-    "Technical Team Lead, AWS Educate Cloud Ambassadors: 3 workshops, 100+ attendees",
-    "28th of 150 teams: HKCERT Capture the Flag 2025",
+    "3.93/4.3 CGPA — Dean's List, Tiger Award (Top 10%) & Elite 100 Student",
+    "Security & systems intern at Siemens Mobility Hong Kong",
+    "Technical Team Lead, AWS Educate Cloud Ambassadors — led a team of 9",
+    "28th of 150 teams — HKCERT Capture the Flag 2025",
   ],
 };
 
@@ -120,6 +120,18 @@ export const skills = {
 
 export const experience = [
   {
+    id: "siemens",
+    role: "Data Analytics, AI, and System Integration Intern",
+    company: "Siemens Mobility Hong Kong",
+    period: "Jun 2025 – Present",
+    location: "Hong Kong",
+    bullets: [
+      "Built a two-hop bastion architecture for least-privilege data-center access (an SSH bastion host fronting a Kubernetes-hosted JumpServer PAM console, with per-asset local port forwarding), hardened Windows and Ubuntu servers against CIS benchmarks, and layered production web security with Fail2ban and HAProxy rate limiting.",
+      "Helped deploy a containerized, real-time microservice platform (Python, Spring Boot, Kafka, Redis, PostgreSQL) on Docker and Kubernetes for an intelligent transportation analytics use case (YOLOv8, NVIDIA DeepStream), building new pipeline features and later contributing C++ code to a performance-focused rewrite.",
+      "Built multi-stage GitLab CI/CD pipelines for parallel ARM and AMD builds, artifact management, and secure container deployment, improving deployment reliability.",
+    ],
+  },
+  {
     id: "cityu-vp-office",
     role: "Digital Transformation and Automation Intern",
     company: "Office of the Vice-President (RES), CityU",
@@ -138,18 +150,6 @@ export const experience = [
     location: "Hong Kong",
     bullets: [
       "Led a team of 9 to design and deliver 3 workshops on cloud fundamentals and AI/ML (including Amazon Bedrock, QuickSight) to 100+ attendees, coordinating with AWS professionals, faculty, and event and marketing teams, and distributing 37 certification vouchers.",
-    ],
-  },
-  {
-    id: "siemens",
-    role: "Data Analytics, AI, and System Integration Intern",
-    company: "Siemens Mobility Hong Kong",
-    period: "Jun 2025 – Present",
-    location: "Hong Kong",
-    bullets: [
-      "Built a two-hop bastion architecture for least-privilege data-center access (an SSH bastion host fronting a Kubernetes-hosted JumpServer PAM console, with per-asset local port forwarding), hardened Windows and Ubuntu servers against CIS benchmarks, and layered production web security with Fail2ban and HAProxy rate limiting.",
-      "Helped deploy a containerized, real-time microservice platform (Python, Spring Boot, Kafka, Redis, PostgreSQL) on Docker and Kubernetes for an intelligent transportation analytics use case (YOLOv8, NVIDIA DeepStream), building new pipeline features and later contributing C++ code to a performance-focused rewrite.",
-      "Built multi-stage GitLab CI/CD pipelines for parallel ARM and AMD builds, artifact management, and secure container deployment, improving deployment reliability.",
     ],
   },
   {
