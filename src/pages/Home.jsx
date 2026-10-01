@@ -2,9 +2,10 @@ import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import Hero from "../components/Hero.jsx";
 import AboutEducation from "../components/AboutEducation.jsx";
-import Skills from "../components/Skills.jsx";
 import Experience from "../components/Experience.jsx";
 import Projects from "../components/Projects.jsx";
+import Leadership from "../components/Leadership.jsx";
+import Skills from "../components/Skills.jsx";
 
 export default function Home() {
   const { hash } = useLocation();
@@ -24,8 +25,9 @@ export default function Home() {
       <Hero />
       <AboutEducation />
       <Experience />
-      <Skills />
       <Projects />
+      <Leadership />
+      <Skills />
     </>
   );
 }

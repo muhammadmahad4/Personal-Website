@@ -1,5 +1,5 @@
 import SectionHeading from "./SectionHeading.jsx";
-import { about, education, extracurriculars } from "../data/portfolioData.js";
+import { about, education } from "../data/portfolioData.js";
 
 export default function AboutEducation() {
   return (
@@ -65,23 +65,6 @@ export default function AboutEducation() {
           ))}
         </div>
 
-        <div className="mt-12">
-          <h3 className="mb-6 text-xl font-semibold text-slate-900 dark:text-white">
-            Extracurriculars
-          </h3>
-          <div className="grid gap-4 sm:grid-cols-2">
-            {extracurriculars.map((item) => (
-              <div
-                key={item.role}
-                className="rounded-xl border border-slate-200 p-4 dark:border-slate-800"
-              >
-                <p className="font-medium text-slate-900 dark:text-white">{item.role}</p>
-                <p className="mt-1 text-sm text-brand-600 dark:text-brand-400">{item.org}</p>
-                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">{item.period}</p>
-              </div>
-            ))}
-          </div>
-        </div>
       </div>
     </section>
   );

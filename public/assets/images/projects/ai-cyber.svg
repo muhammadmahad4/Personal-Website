@@ -1,4 +1,141 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="800" height="450" viewBox="0 0 800 450">
-  <rect width="800" height="450" fill="#1e40af"/>
-  <text x="400" y="225" text-anchor="middle" dominant-baseline="middle" fill="white" font-family="Inter,sans-serif" font-size="28" font-weight="600">Agentic AI for Cyber Security</text>
+  <defs>
+    <linearGradient id="bgL" x1="0" y1="0" x2="0" y2="1" gradientUnits="objectBoundingBox">
+      <stop offset="0%" stop-color="#070d1a"/>
+      <stop offset="100%" stop-color="#0a1220"/>
+    </linearGradient>
+    <linearGradient id="bgR" x1="0" y1="0" x2="1" y2="1" gradientUnits="objectBoundingBox">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#1e1b4b"/>
+    </linearGradient>
+    <linearGradient id="shieldFill" x1="0" y1="0" x2="0" y2="1" gradientUnits="objectBoundingBox">
+      <stop offset="0%" stop-color="#155e75"/>
+      <stop offset="100%" stop-color="#0c4a6e"/>
+    </linearGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="lineGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Left panel background -->
+  <rect x="0" y="0" width="405" height="450" fill="url(#bgL)"/>
+  <!-- Right panel background -->
+  <rect x="405" y="0" width="395" height="450" fill="url(#bgR)"/>
+
+  <!-- Divider line with glow -->
+  <line x1="405" y1="0" x2="405" y2="450" stroke="#22d3ee" stroke-width="1" opacity="0.3" filter="url(#lineGlow)"/>
+
+  <!-- ── LEFT: Terminal ── -->
+  <!-- Terminal window frame -->
+  <rect x="18" y="18" width="370" height="414" rx="8" fill="#0b1622" stroke="#1e3a5f" stroke-width="1"/>
+  <!-- Title bar -->
+  <rect x="18" y="18" width="370" height="32" rx="8" fill="#162030"/>
+  <rect x="18" y="34" width="370" height="16" fill="#162030"/>
+  <!-- Traffic lights -->
+  <circle cx="40" cy="34" r="5.5" fill="#ff5f57"/>
+  <circle cx="58" cy="34" r="5.5" fill="#febc2e"/>
+  <circle cx="76" cy="34" r="5.5" fill="#28c840"/>
+  <text x="203" y="39" text-anchor="middle" fill="#475569" font-family="monospace" font-size="10.5">openclaw — agent terminal</text>
+
+  <!-- Terminal text lines -->
+  <text x="32" y="76" fill="#64748b" font-family="monospace" font-size="11">$ ./openclaw --target 10.10.10.5 --mode auto</text>
+  <text x="32" y="96" fill="#475569" font-family="monospace" font-size="11">[*] Initializing agentic AI runtime...</text>
+  <text x="32" y="114" fill="#34d399" font-family="monospace" font-size="11">[+] Docker/Podman environment: ready</text>
+  <text x="32" y="132" fill="#34d399" font-family="monospace" font-size="11">[+] Kubernetes cluster: connected</text>
+  <text x="32" y="152" fill="#475569" font-family="monospace" font-size="11">[*] Running Nmap reconnaissance...</text>
+  <!-- Port scan output -->
+  <text x="32" y="170" fill="#22d3ee" font-family="monospace" font-size="10.5">    PORT    STATE   SERVICE   VERSION</text>
+  <text x="32" y="186" fill="#22d3ee" font-family="monospace" font-size="10.5">    22/tcp  open    ssh       OpenSSH 8.9</text>
+  <text x="32" y="202" fill="#22d3ee" font-family="monospace" font-size="10.5">    80/tcp  open    http      nginx 1.22</text>
+  <text x="32" y="218" fill="#22d3ee" font-family="monospace" font-size="10.5">    443/tcp open    https     nginx 1.22</text>
+  <text x="32" y="238" fill="#475569" font-family="monospace" font-size="11">[*] Querying AbuseIPDB...</text>
+  <text x="32" y="256" fill="#f59e0b" font-family="monospace" font-size="11">[!] Threat score: 87 — 142 reports</text>
+  <text x="32" y="276" fill="#475569" font-family="monospace" font-size="11">[*] Sending context to LLM...</text>
+  <text x="32" y="294" fill="#34d399" font-family="monospace" font-size="11">[+] Threat correlation: HIGH RISK</text>
+  <text x="32" y="314" fill="#475569" font-family="monospace" font-size="11">[*] Checking for prompt injection...</text>
+  <text x="32" y="332" fill="#f87171" font-family="monospace" font-size="11">[!] Injection attempt detected</text>
+  <text x="32" y="350" fill="#34d399" font-family="monospace" font-size="11">[+] Sandboxed — mitigation applied ✓</text>
+  <text x="32" y="370" fill="#475569" font-family="monospace" font-size="11">[*] Generating hardening report...</text>
+  <text x="32" y="390" fill="#22d3ee" font-family="monospace" font-size="11">[+] Report saved → /reports/scan_001.pdf</text>
+  <!-- Blinking cursor line -->
+  <text x="32" y="412" fill="#22d3ee" font-family="monospace" font-size="11">$ <rect x="47" y="401" width="8" height="12" fill="#22d3ee" opacity="0.8"/></text>
+  <rect x="47" y="401" width="8" height="12" fill="#22d3ee" opacity="0.8"/>
+
+  <!-- ── RIGHT: Shield + Badges ── -->
+  <!-- Subtle dot grid on right -->
+  <g fill="#1e3a5f" opacity="0.35">
+    <circle cx="450" cy="40" r="1.2"/><circle cx="490" cy="40" r="1.2"/><circle cx="530" cy="40" r="1.2"/><circle cx="570" cy="40" r="1.2"/><circle cx="610" cy="40" r="1.2"/><circle cx="650" cy="40" r="1.2"/><circle cx="690" cy="40" r="1.2"/><circle cx="730" cy="40" r="1.2"/><circle cx="770" cy="40" r="1.2"/>
+    <circle cx="450" cy="80" r="1.2"/><circle cx="490" cy="80" r="1.2"/><circle cx="530" cy="80" r="1.2"/><circle cx="570" cy="80" r="1.2"/><circle cx="610" cy="80" r="1.2"/><circle cx="650" cy="80" r="1.2"/><circle cx="690" cy="80" r="1.2"/><circle cx="730" cy="80" r="1.2"/><circle cx="770" cy="80" r="1.2"/>
+    <circle cx="450" cy="120" r="1.2"/><circle cx="490" cy="120" r="1.2"/><circle cx="530" cy="120" r="1.2"/><circle cx="570" cy="120" r="1.2"/><circle cx="610" cy="120" r="1.2"/><circle cx="650" cy="120" r="1.2"/><circle cx="690" cy="120" r="1.2"/><circle cx="730" cy="120" r="1.2"/><circle cx="770" cy="120" r="1.2"/>
+    <circle cx="450" cy="160" r="1.2"/><circle cx="490" cy="160" r="1.2"/><circle cx="530" cy="160" r="1.2"/><circle cx="570" cy="160" r="1.2"/><circle cx="610" cy="160" r="1.2"/><circle cx="650" cy="160" r="1.2"/><circle cx="690" cy="160" r="1.2"/><circle cx="730" cy="160" r="1.2"/><circle cx="770" cy="160" r="1.2"/>
+    <circle cx="450" cy="200" r="1.2"/><circle cx="490" cy="200" r="1.2"/><circle cx="530" cy="200" r="1.2"/><circle cx="570" cy="200" r="1.2"/><circle cx="610" cy="200" r="1.2"/><circle cx="650" cy="200" r="1.2"/><circle cx="690" cy="200" r="1.2"/><circle cx="730" cy="200" r="1.2"/><circle cx="770" cy="200" r="1.2"/>
+    <circle cx="450" cy="240" r="1.2"/><circle cx="490" cy="240" r="1.2"/><circle cx="530" cy="240" r="1.2"/><circle cx="570" cy="240" r="1.2"/><circle cx="610" cy="240" r="1.2"/><circle cx="650" cy="240" r="1.2"/><circle cx="690" cy="240" r="1.2"/><circle cx="730" cy="240" r="1.2"/><circle cx="770" cy="240" r="1.2"/>
+    <circle cx="450" cy="280" r="1.2"/><circle cx="490" cy="280" r="1.2"/><circle cx="530" cy="280" r="1.2"/><circle cx="570" cy="280" r="1.2"/><circle cx="610" cy="280" r="1.2"/><circle cx="650" cy="280" r="1.2"/><circle cx="690" cy="280" r="1.2"/><circle cx="730" cy="280" r="1.2"/><circle cx="770" cy="280" r="1.2"/>
+    <circle cx="450" cy="320" r="1.2"/><circle cx="490" cy="320" r="1.2"/><circle cx="530" cy="320" r="1.2"/><circle cx="570" cy="320" r="1.2"/><circle cx="610" cy="320" r="1.2"/><circle cx="650" cy="320" r="1.2"/><circle cx="690" cy="320" r="1.2"/><circle cx="730" cy="320" r="1.2"/><circle cx="770" cy="320" r="1.2"/>
+    <circle cx="450" cy="360" r="1.2"/><circle cx="490" cy="360" r="1.2"/><circle cx="530" cy="360" r="1.2"/><circle cx="570" cy="360" r="1.2"/><circle cx="610" cy="360" r="1.2"/><circle cx="650" cy="360" r="1.2"/><circle cx="690" cy="360" r="1.2"/><circle cx="730" cy="360" r="1.2"/><circle cx="770" cy="360" r="1.2"/>
+    <circle cx="450" cy="400" r="1.2"/><circle cx="490" cy="400" r="1.2"/><circle cx="530" cy="400" r="1.2"/><circle cx="570" cy="400" r="1.2"/><circle cx="610" cy="400" r="1.2"/><circle cx="650" cy="400" r="1.2"/><circle cx="690" cy="400" r="1.2"/><circle cx="730" cy="400" r="1.2"/><circle cx="770" cy="400" r="1.2"/>
+  </g>
+
+  <!-- Decorative ring behind shield -->
+  <circle cx="603" cy="185" r="105" fill="none" stroke="#1e3a5f" stroke-width="1" opacity="0.6" stroke-dasharray="6,12"/>
+  <circle cx="603" cy="185" r="75" fill="none" stroke="#1e3a5f" stroke-width="0.5" opacity="0.4"/>
+
+  <!-- Central Shield (centered at 603, 185) -->
+  <!-- Outer glow -->
+  <path d="M603,92 L658,112 L658,185 Q658,232 603,252 Q548,232 548,185 L548,112 Z"
+        fill="none" stroke="#22d3ee" stroke-width="6" opacity="0.1" filter="url(#glow)"/>
+  <!-- Shield body -->
+  <path d="M603,98 L652,116 L652,185 Q652,228 603,246 Q554,228 554,185 L554,116 Z"
+        fill="url(#shieldFill)" stroke="#22d3ee" stroke-width="1.8" filter="url(#glow)"/>
+  <!-- Shield inner highlight -->
+  <path d="M603,106 L644,121 L644,183 Q644,220 603,235 Q562,220 562,183 L562,121 Z"
+        fill="none" stroke="#22d3ee" stroke-width="0.5" opacity="0.3"/>
+
+  <!-- AI text inside shield -->
+  <text x="603" y="182" text-anchor="middle" fill="#22d3ee" font-family="monospace" font-size="36" font-weight="bold" filter="url(#glow)">AI</text>
+  <line x1="568" y1="194" x2="638" y2="194" stroke="#22d3ee" stroke-width="0.8" opacity="0.4"/>
+  <text x="603" y="212" text-anchor="middle" fill="#0e7490" font-family="monospace" font-size="10" letter-spacing="1.5">SECURITY</text>
+
+  <!-- Right panel title -->
+  <text x="603" y="55" text-anchor="middle" fill="#94a3b8" font-family="Inter,sans-serif" font-size="11" font-weight="500" letter-spacing="1">AGENTIC AI FOR CYBER SECURITY</text>
+  <line x1="480" y1="62" x2="726" y2="62" stroke="#1e3a5f" stroke-width="0.8"/>
+
+  <!-- Tech badges - 2 rows of 3 -->
+  <!-- Row 1 -->
+  <rect x="450" y="270" width="72" height="26" rx="13" fill="rgba(34,211,238,0.08)" stroke="#22d3ee" stroke-width="1"/>
+  <text x="486" y="287" text-anchor="middle" fill="#22d3ee" font-family="Inter,sans-serif" font-size="11" font-weight="600">Docker</text>
+
+  <rect x="534" y="270" width="60" height="26" rx="13" fill="rgba(167,139,250,0.08)" stroke="#a78bfa" stroke-width="1"/>
+  <text x="564" y="287" text-anchor="middle" fill="#a78bfa" font-family="Inter,sans-serif" font-size="11" font-weight="600">K8s</text>
+
+  <rect x="606" y="270" width="58" height="26" rx="13" fill="rgba(34,211,238,0.08)" stroke="#22d3ee" stroke-width="1"/>
+  <text x="635" y="287" text-anchor="middle" fill="#22d3ee" font-family="Inter,sans-serif" font-size="11" font-weight="600">LLMs</text>
+
+  <rect x="676" y="270" width="60" height="26" rx="13" fill="rgba(52,211,153,0.08)" stroke="#34d399" stroke-width="1"/>
+  <text x="706" y="287" text-anchor="middle" fill="#34d399" font-family="Inter,sans-serif" font-size="11" font-weight="600">Nmap</text>
+
+  <!-- Row 2 -->
+  <rect x="472" y="308" width="64" height="26" rx="13" fill="rgba(52,211,153,0.08)" stroke="#34d399" stroke-width="1"/>
+  <text x="504" y="325" text-anchor="middle" fill="#34d399" font-family="Inter,sans-serif" font-size="11" font-weight="600">React</text>
+
+  <rect x="548" y="308" width="118" height="26" rx="13" fill="rgba(167,139,250,0.08)" stroke="#a78bfa" stroke-width="1"/>
+  <text x="607" y="325" text-anchor="middle" fill="#a78bfa" font-family="Inter,sans-serif" font-size="11" font-weight="600">OpenClaw · Node.js</text>
+
+  <rect x="678" y="308" width="66" height="26" rx="13" fill="rgba(34,211,238,0.08)" stroke="#22d3ee" stroke-width="1"/>
+  <text x="711" y="325" text-anchor="middle" fill="#22d3ee" font-family="Inter,sans-serif" font-size="11" font-weight="600">Redis</text>
+
+  <!-- Final Year Project label -->
+  <rect x="515" y="358" width="180" height="30" rx="15" fill="rgba(14,116,144,0.2)" stroke="#0891b2" stroke-width="1"/>
+  <text x="605" y="378" text-anchor="middle" fill="#22d3ee" font-family="Inter,sans-serif" font-size="12" font-weight="700" letter-spacing="0.5">FINAL YEAR PROJECT</text>
+
+  <!-- Footer strip -->
+  <rect x="0" y="418" width="800" height="32" fill="rgba(0,0,0,0.4)"/>
+  <line x1="0" y1="418" x2="800" y2="418" stroke="#1e3a5f" stroke-width="0.8"/>
+  <text x="18" y="438" fill="#64748b" font-family="Inter,sans-serif" font-size="10.5">City University of Hong Kong · BSc Computer Science</text>
+  <text x="782" y="438" text-anchor="end" fill="#22d3ee" font-family="monospace" font-size="10.5">agentic-ai-security</text>
 </svg>

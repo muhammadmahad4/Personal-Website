@@ -5,10 +5,11 @@
 
 export const personalInfo = {
   name: "Muhammad Mahad",
-  title: "Software Engineer & Cybersecurity Enthusiast",
-  tagline: "Building cloud-native, AI-powered systems with a security-first mindset.",
+  title: "Cybersecurity & Software Engineering Student",
+  tagline:
+    "Reading the racket early, watching the ball closely: securing systems by design, and building AI that can test them.",
   email: "mmahad2-c@my.cityu.edu.hk",
-  phone: "(852) 5962 4263",
+  phone: "+852 5962 4263",
   location: "Hong Kong",
   github: "https://github.com/muhammadmahad4",
   linkedin: "https://www.linkedin.com/in/muhammad-mahad-16a115246/",
@@ -18,12 +19,12 @@ export const personalInfo = {
 
 export const about = {
   summary:
-    "Computer Science undergraduate at CityU (CGPA 3.93/4.3 | Full Tuition Scholarship) with hands-on experience in cloud-native systems, DevSecOps, and agentic AI security. Currently building production ML pipelines at Siemens Mobility Hong Kong. Placed 28th/150 teams in HKCERT CTF 2025.",
+    "Final-year Computer Science student at CityU (Cybersecurity Stream, CGPA 3.93/4.3, Full Tuition Scholarship). I chose CS to understand how systems are built and the Cybersecurity Stream to understand how they break. At Siemens Mobility I work on the defensive side: least-privilege data-center access and server hardening. Evenings go to CTFs and HackTheBox write-ups that end with the root cause, not just the exploit. My final-year project asks how well an autonomous AI agent can do security work, and what new risks it brings.",
   highlights: [
-    "CGPA 3.93/4.3 — Dean's List & Tiger Award (Top 10% of Students)",
-    "Software Engineering Intern at Siemens Mobility Hong Kong",
-    "Team Lead, Technical Teaching Team — AWS Cloud Student Ambassador",
-    "28th of 150 teams — HKCERT Capture the Flag 2025",
+    "CGPA 3.93/4.3: Dean's List, Tiger Award (Top 10% of Students) & Elite 100 Student",
+    "Intern at Siemens Mobility Hong Kong: bastion/PAM access design and CIS hardening",
+    "Technical Team Lead, AWS Educate Cloud Ambassadors: 3 workshops, 100+ attendees",
+    "28th of 150 teams: HKCERT Capture the Flag 2025",
   ],
 };
 
@@ -31,14 +32,14 @@ export const education = [
   {
     id: "cityu-bsc",
     institution: "City University of Hong Kong",
-    degree: "BSc. Computer Science",
+    degree: "BSc. Computer Science, Cybersecurity Stream",
     gpa: "CGPA: 3.93/4.3",
-    period: "Sep 2023 – May 2027",
+    period: "Sep 2023 – Jun 2027",
     location: "Hong Kong",
     honors: [
       "Full Tuition Scholarship",
       "Belt and Road Scholarship Recipient — Hong Kong Government",
-      "Dean's List & Tiger Award (Top 10% of Students)",
+      "Dean's List, Tiger Award (Top 10% of Students) & Elite 100 Student",
     ],
   },
   {
@@ -60,38 +61,58 @@ export const skills = {
   languages: [
     "Python",
     "Java",
-    "JavaScript / TypeScript",
+    "JavaScript",
+    "TypeScript",
     "C++",
+    "SQL",
     "React",
     "Node.js",
     "Spring Boot",
   ],
   infraAndData: [
-    "Docker",
-    "Kubernetes",
     "AWS",
+    "Docker",
+    "Podman",
+    "Kubernetes",
+    "Proxmox",
+    "Hyper-V",
+    "GitLab CI/CD",
+    "Linux",
     "Kafka",
     "PostgreSQL",
     "MongoDB",
     "Redis",
-    "GitLab CI/CD",
-    "Linux",
   ],
   aiAndSecurity: [
-    "OpenAI / DeepSeek APIs",
-    "LLMs",
-    "Nmap",
-    "HAProxy",
-    "Fail2ban",
-    "JumpServer",
+    "Penetration Testing",
+    "Vulnerability Analysis",
+    "Application Security",
+    "AI / LLM Security",
+    "AI Governance",
+    "Risk Assessment",
+    "Identity & Access Management (JumpServer)",
+    "System Hardening (CIS Benchmarks, CIS-CAT)",
+    "Intrusion Prevention (Fail2ban)",
+    "Threat Correlation",
+    "MITRE ATT&CK",
+  ],
+  aiAndAutomation: [
+    "Multi-Agent Workflows",
+    "Agentic AI (OpenClaw, Hermes)",
+    "Generative AI (Amazon Bedrock)",
+    "Prompt Engineering (OpenAI, DeepSeek APIs)",
+    "n8n",
+    "Make.com",
+    "Dify",
   ],
   softSkills: [
-    "Problem solving",
-    "Analytical thinking",
-    "Leadership",
-    "Teamwork",
+    "Structured problem-solving",
+    "Technical writing",
+    "Stakeholder communication",
+    "Collaborative leadership",
   ],
   certifications: [
+    { name: "AWS Certified AI Practitioner (Responsible AI, RAG)", date: "", status: "Completed" },
     { name: "NVIDIA — Fundamentals of Deep Learning", date: "Jan 2026", status: "Completed" },
     { name: "HackTheBox — Certified Penetration Testing Specialist", date: "2026", status: "In Progress" },
   ],
@@ -99,27 +120,36 @@ export const skills = {
 
 export const experience = [
   {
-    id: "siemens",
-    role: "Software Engineering Intern",
-    company: "Siemens Mobility Hong Kong",
-    period: "Jun 2025 – Present",
+    id: "cityu-vp-office",
+    role: "Digital Transformation and Automation Intern",
+    company: "Office of the Vice-President (RES), CityU",
+    period: "Jul 2026 – Present",
     location: "Hong Kong",
     bullets: [
-      "Built a containerized, event-driven video analytics platform for intelligent transportation using Python (DeepStream), YOLOv8, and a Spring Boot/Kafka/Redis/PostgreSQL microservice stack, deployed via Docker.",
-      "Automated secure remote access using Hyper-V, cross-platform hardening with CIS benchmarks, and JumpServer on Kubernetes, streamlining SSH key management and centralizing firewall controls.",
-      "Layered production web security with Fail2ban and HAProxy rate limiting, mitigating DDoS and targeted attacks while preserving logging and scalability.",
-      "Optimized multi-stage GitLab CI/CD pipelines for cross-platform (ARM/AMD) parallel builds and secure container deployment.",
-      "Built a full-stack image annotator tool with React, Java, and PostgreSQL to facilitate precise ROI drawing on camera streams, significantly improving data labeling efficiency for computer vision and data analytics projects.",
+      "Architected a multi-agent AI system (Hermes agents on Docker): one master agent with admin privileges overseeing 7 isolated per-employee agents, each equipped with Honcho for persistent contextual memory, addressing AI governance, privilege-separation, and data-segregation risk.",
+      "Built AI-assisted automation workflows (n8n, Make.com, Dify) and set up secure jump host server access for staff.",
     ],
   },
   {
     id: "aws-ambassador",
     role: "Team Lead, Technical Teaching Team",
-    company: "AWS Cloud Student Ambassador, AWS Hong Kong",
+    company: "AWS Educate Cloud Ambassador, AWS Hong Kong",
     period: "Dec 2025 – Present",
     location: "Hong Kong",
     bullets: [
-      "Serve as Technical Team Lead, designing and delivering 3 workshops on cloud fundamentals, AI/ML, and deep learning (incl. AWS Bedrock, QuickSight) to 100+ attendees, distributing 37 certification vouchers while coordinating with AWS professionals and faculty to drive campus-wide cloud awareness.",
+      "Led a team of 9 to design and deliver 3 workshops on cloud fundamentals and AI/ML (including Amazon Bedrock, QuickSight) to 100+ attendees, coordinating with AWS professionals, faculty, and event and marketing teams, and distributing 37 certification vouchers.",
+    ],
+  },
+  {
+    id: "siemens",
+    role: "Data Analytics, AI, and System Integration Intern",
+    company: "Siemens Mobility Hong Kong",
+    period: "Jun 2025 – Present",
+    location: "Hong Kong",
+    bullets: [
+      "Built a two-hop bastion architecture for least-privilege data-center access (an SSH bastion host fronting a Kubernetes-hosted JumpServer PAM console, with per-asset local port forwarding), hardened Windows and Ubuntu servers against CIS benchmarks, and layered production web security with Fail2ban and HAProxy rate limiting.",
+      "Helped deploy a containerized, real-time microservice platform (Python, Spring Boot, Kafka, Redis, PostgreSQL) on Docker and Kubernetes for an intelligent transportation analytics use case (YOLOv8, NVIDIA DeepStream), building new pipeline features and later contributing C++ code to a performance-focused rewrite.",
+      "Built multi-stage GitLab CI/CD pipelines for parallel ARM and AMD builds, artifact management, and secure container deployment, improving deployment reliability.",
     ],
   },
   {
@@ -129,9 +159,8 @@ export const experience = [
     period: "Jun 2024 – Aug 2024",
     location: "Hong Kong",
     bullets: [
-      "Scraped and analyzed 700+ URLs, then built a Python/OpenAI API data pipeline for structured extraction into MongoDB, improving event data collection efficiency by 70%.",
-      "Developed a WhatsApp chatbot (WhatsApp API, OpenAI API, Botpress, Node.js/Express) automating inquiries and event registration, cutting manual workload by 20+ hours/week.",
-      "Built a secure login system with React and Twilio/Memberstack verification, reducing unauthorized access attempts by 40%.",
+      "Analyzed a business problem (slow manual event-data collection) and designed a solution: scraped 700+ URLs via a Python and OpenAI API prompt-engineering pipeline into MongoDB, cutting collection time by 70%.",
+      "Engineered a secure login system (React, Twilio/Memberstack verification) that cut unauthorized access attempts by 40%; also built a client-facing WhatsApp chatbot (OpenAI API, Botpress, Node.js/Express) automating inquiries and registration, saving 20+ hours weekly.",
     ],
   },
 ];
@@ -139,14 +168,13 @@ export const experience = [
 export const projects = [
   {
     id: "agentic-ai-cyber",
-    title: "Agentic AI for Cyber Security",
+    title: "Agentic AI for Cybersecurity",
     subtitle: "Final Year Project",
-    tags: ["OpenClaw", "LLMs", "Docker", "Kubernetes", "React", "Node.js", "Nmap"],
+    tags: ["OpenClaw", "LLMs", "Docker", "Kubernetes", "React", "MITRE ATT&CK", "Prompt Injection"],
     image: "/assets/images/projects/ai-cyber.svg",
     bullets: [
-      "Architecting a secure, hardened OpenClaw agentic AI deployment in Docker/Podman and Kubernetes, integrating PostgreSQL, Redis, and a React.js/Node.js dashboard for autonomous security workflow automation.",
-      "Deploying a hardened OpenClaw agentic AI platform (Docker/Podman, Kubernetes) with custom modules for reconnaissance, log analysis, and threat correlation using Nmap and AbuseIPDB API.",
-      "Evaluating agent performance via quantitative metrics against traditional tools while assessing AI-native risks (prompt injection, privilege escalation) to produce hardening recommendations.",
+      "Architecting a hardened, multi-agent security platform (OpenClaw) in an isolated lab, with custom modules for reconnaissance, vulnerability scanning, log and threat correlation, and controlled exploit chaining, gated by a safety layer with MITRE ATT&CK-mapped checks and human approval for high-risk actions.",
+      "Evaluating agent performance against traditional tools and assessing AI/LLM security risks, including prompt injection and privilege escalation, then hardening the agent and re-testing to show which controls reduce risk.",
     ],
     links: {},
   },
@@ -157,7 +185,7 @@ export const projects = [
     tags: ["DeepSeek API", "Google OAuth", "React", "Node.js", "Express"],
     image: "/assets/images/projects/auto-email.svg",
     bullets: [
-      "Built a full-stack email automation tool using Google OAuth and the DeepSeek API for AI-powered content generation, streamlining job application workflows by 90%.",
+      "Built a full-stack automation tool applying prompt engineering with the DeepSeek API for AI-generated content, streamlining job application workflows by 90%.",
     ],
     links: {
       github: "https://github.com/muhammadmahad4/Auto-Emailer",
@@ -172,14 +200,24 @@ export const leadership = [
     date: "Dec 2025",
   },
   {
-    title: "Teaching Assistant, CS2204: Fundamentals of Internet Applications Dev.",
+    title: "PolyU x NuttyShell Cybersecurity CTF — Participant",
     detail: null,
+    date: "Mar 2026",
+  },
+  {
+    title: "Teaching Assistant, CS2204: Fundamentals of Internet Applications Dev.",
+    detail: "CityU",
     date: "SemA 2025 & 2026",
+  },
+  {
+    title: "SEN Tutor, CS3103: Operating Systems",
+    detail: "CityU",
+    date: "SemB 2025 & 2026",
   },
   {
     title: "Discipline Resident Tutor",
     detail: "Student Residence Office, CityU",
-    date: "2025–Present",
+    date: "2025–2026",
   },
   {
     title: "Executive Member",
